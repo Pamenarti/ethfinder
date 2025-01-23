@@ -12,7 +12,6 @@ import secrets
 from queue import Queue
 from threading import Lock
 import logging
-from typing import List, Dict
 import signal
 import sys
 import threading
@@ -88,7 +87,7 @@ class EthereumWalletGenerator:
             print("Hata: {}".format(e))
             return 0
     
-    def save_wallet_batch(self, wallets: List[Dict]):
+    def save_wallet_batch(self, wallets):
         if not self.save_wallets:
             return
 
@@ -107,7 +106,7 @@ class EthereumWalletGenerator:
             except Exception as e:
                 print("Toplu kayıt hatası: {}".format(e))
 
-    def log_wallet_batch(self, entries: List[str]):
+    def log_wallet_batch(self, entries):
         with self.log_lock:
             with open(self.log_file, 'a', encoding='utf-8') as f:
                 f.writelines(entries)
@@ -132,7 +131,7 @@ class EthereumWalletGenerator:
             
             if self.wallet_limit:
                 progress = (self.total_generated / self.wallet_limit) * 100
-                print("\rİlerleme: {:.1f}% ({}/{})".format(progress, self.total_generated, self.wallet_limit), end="")
+                print("\rIlerleme: {:.1f}% ({}/{})".format(progress, self.total_generated, self.wallet_limit), end="")
             
             print(self.display_format.format(
                 self.total_generated,
@@ -243,7 +242,7 @@ class EthereumWalletGenerator:
                                 f.result()
                                 completed.add(f)
                             except Exception as e:
-                                print("İşlem hatası: {}".format(e))
+                                print("Islem hatasi: {}".format(e))
                     
                     futures -= completed
                     
@@ -258,7 +257,7 @@ class EthereumWalletGenerator:
                             try:
                                 f.result()
                             except Exception as e:
-                                print("İşlem hatası: {}".format(e))
+                                print("Islem hatasi: {}".format(e))
                         futures -= completed
                         
             except KeyboardInterrupt:
@@ -266,7 +265,7 @@ class EthereumWalletGenerator:
                 self.running = False
                 
             finally:
-                print("\nİşlemler durduruluyor...")
+                print("\nIslemler durduruluyor...")
                 for future in futures:
                     future.cancel()
                 
@@ -313,8 +312,7 @@ def main():
     parser.add_argument('--threads', type=int, default=4, help='İş parçacığı sayısı')
     parser.add_argument('--limit', type=int, help='Üretilecek cüzdan sayısı')
     parser.add_argument('--save', action='store_true', help='Taranan cüzdanları kaydet')
-    parser.add_argument('--delay', type=float, default=0, 
-                       help='Her cüzdan üretimi arasındaki bekleme süresi (saniye)')
+    parser.add_argument('--delay', type=float, default=0, help='Her cüzdan üretimi arasındaki bekleme süresi (saniye)')
     
     args = parser.parse_args()
     
