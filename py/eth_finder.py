@@ -57,7 +57,6 @@ class EthereumWalletGenerator:
         self.wallet_buffer = []
         self.running = True
         signal.signal(signal.SIGINT, self.signal_handler)
-        self.stop_thread = None
         
     def signal_handler(self, signum, frame):
         print("\n\nDurdurma sinyali alindi. Program guvenli bir sekilde sonlandiriliyor...")
@@ -182,30 +181,6 @@ class EthereumWalletGenerator:
         print("Log dosyasi: %s" % self.log_file)
         print("=" * 50 + "\n")
 
-    def check_stop_key(self):
-        print("\nProgrami durdurmak icin 'S' tusuna basin...")
-        
-        if os.name == 'nt':
-            while self.running:
-                if msvcrt.kbhit():
-                    key = msvcrt.getch().decode('utf-8').lower()
-                    if key == 's':
-                        print("\nS tusuna basildi. Program kapatiliyor...")
-                        self.running = False
-                        break
-                time.sleep(0.1)
-        else:
-            old_settings = termios.tcgetattr(sys.stdin)
-            try:
-                tty.setcbreak(sys.stdin.fileno())
-                while self.running:
-                    if sys.stdin.read(1).lower() == 's':
-                        print("\nS tusuna basildi. Program kapatiliyor...")
-                        self.running = False
-                        break
-            finally:
-                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-
     def run(self, num_threads=4):
         print("%sEthereum cuzdan taramasi baslatiliyor..." % ('TEST MODUNDA ' if self.test_mode else ''))
         if self.wallet_limit:
@@ -217,10 +192,6 @@ class EthereumWalletGenerator:
         optimal_threads = min(32, os.cpu_count() * 2) if num_threads == 4 else num_threads
         
         with ThreadPoolExecutor(max_workers=optimal_threads) as executor:
-            stop_thread = threading.Thread(target=self.check_stop_key)
-            stop_thread.daemon = True
-            stop_thread.start()
-            
             futures = set()
             remaining = self.wallet_limit if self.wallet_limit else float('inf')
             
@@ -275,9 +246,6 @@ class EthereumWalletGenerator:
                             pass
                 
                 self.running = False
-                if stop_thread.is_alive():
-                    stop_thread.join(timeout=1)
-                
                 print("\nProgram durduruldu.")
                 self.print_final_stats()
 
