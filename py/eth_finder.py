@@ -45,8 +45,8 @@ class EthereumWalletGenerator:
         
         # Log dosyası için timestamp oluştur
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.log_file = f"wallet_scan_{timestamp}.log"
-        print(f"Log dosyası: {self.log_file}")
+        self.log_file = "wallet_scan_{}.log".format(timestamp)
+        print("Log dosyası: {}".format(self.log_file))
         
         # Log başlık satırını yaz
         with open(self.log_file, 'w', encoding='utf-8') as f:
@@ -94,7 +94,7 @@ class EthereumWalletGenerator:
             balance = w3.eth.get_balance(address)
             return w3.from_wei(balance, 'ether')
         except Exception as e:
-            print(f"Hata: {e}")
+            print("Hata: {}".format(e))
             return 0
     
     def save_wallet_batch(self, wallets: List[Dict]):
@@ -115,7 +115,7 @@ class EthereumWalletGenerator:
                 with open(self.output_file, 'w') as f:
                     json.dump(existing_wallets, f, indent=4)
             except Exception as e:
-                print(f"Toplu kayıt hatası: {e}")
+                print("Toplu kayıt hatası: {}".format(e))
 
     def log_wallet_batch(self, entries: List[str]):
         """Cüzdan loglarını toplu olarak yazar"""
@@ -145,24 +145,24 @@ class EthereumWalletGenerator:
             # İlerleme göstergesi
             if self.wallet_limit:
                 progress = (self.total_generated / self.wallet_limit) * 100
-                print(f"\rİlerleme: {progress:.1f}% ({self.total_generated}/{self.wallet_limit})", end="")
+                print("\rİlerleme: {:.1f}% ({}/{})".format(progress, self.total_generated, self.wallet_limit), end="")
             
             # Ekran çıktısı
             print(self.display_format.format(
                 self.total_generated,
                 wallet['address'],
-                f"{wallet['balance']:.8f} ETH",
+                "{} ETH".format(wallet['balance']),
                 wallet['seed_phrase']
             ))
 
             # Log girişi hazırla
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            log_entries.append(f"{timestamp},{wallet['address']},{wallet['seed_phrase']},{wallet['balance']}\n")
+            log_entries.append("{},{},{},{}\n".format(timestamp, wallet['address'], wallet['seed_phrase'], wallet['balance']))
             
             if wallet['balance'] > 0:
                 wallet['found_at'] = datetime.now().isoformat()
                 self.found_wallets.append(wallet)
-                print(f"\n💰 BAKİYELİ CÜZDAN BULUNDU! Adres: {wallet['address']}, Bakiye: {wallet['balance']} ETH\n")
+                print("\n💰 BAKİYELİ CÜZDAN BULUNDU! Adres: {}, Bakiye: {} ETH\n".format(wallet['address'], wallet['balance']))
             
             wallets.append(wallet)
         
@@ -190,17 +190,17 @@ class EthereumWalletGenerator:
         total_seconds = int(elapsed_time.total_seconds())
         
         print("\n" + "=" * 50)
-        print(f"📊 PERFORMANS İSTATİSTİKLERİ")
+        print("📊 PERFORMANS İSTATİSTİKLERİ")
         print("=" * 50)
-        print(f"⏱️  Geçen süre: {str(timedelta(seconds=total_seconds))}")
-        print(f"📈 Toplam üretilen: {self.total_generated} cüzdan")
-        print(f"⚡ Hız: {speed:.2f} cüzdan/saniye")
+        print("⏱️  Geçen süre: {}".format(str(timedelta(seconds=total_seconds))))
+        print("📈 Toplam üretilen: {} cüzdan".format(self.total_generated))
+        print("⚡ Hız: {:.2f} cüzdan/saniye".format(speed))
         
         if self.total_generated > 0:
-            print(f"💡 Ortalama: {(total_seconds/self.total_generated):.2f} saniye/cüzdan")
+            print("💡 Ortalama: {:.2f} saniye/cüzdan".format(total_seconds/self.total_generated))
         
-        print(f"💰 Bakiyeli bulunan: {len(self.found_wallets)} cüzdan")
-        print(f"📝 Log dosyası: {self.log_file}")
+        print("💰 Bakiyeli bulunan: {} cüzdan".format(len(self.found_wallets)))
+        print("📝 Log dosyası: {}".format(self.log_file))
         print("=" * 50 + "\n")
 
     def check_stop_key(self):
@@ -230,9 +230,9 @@ class EthereumWalletGenerator:
 
     def run(self, num_threads=4):
         """Ana çalıştırma fonksiyonu"""
-        print(f"{'TEST MODUNDA ' if self.test_mode else ''}Ethereum cüzdan taraması başlatılıyor...")
+        print("{}Ethereum cüzdan taraması başlatılıyor...".format('TEST MODUNDA ' if self.test_mode else ''))
         if self.wallet_limit:
-            print(f"Hedef cüzdan sayısı: {self.wallet_limit}")
+            print("Hedef cüzdan sayısı: {}".format(self.wallet_limit))
         
         self.start_time = datetime.now()
         self.last_stat_time = self.start_time
@@ -267,7 +267,7 @@ class EthereumWalletGenerator:
                                 f.result()  # Hataları yakala
                                 completed.add(f)
                             except Exception as e:
-                                print(f"İşlem hatası: {e}")
+                                print("İşlem hatası: {}".format(e))
                     
                     futures -= completed
                     
@@ -285,7 +285,7 @@ class EthereumWalletGenerator:
                             try:
                                 f.result()
                             except Exception as e:
-                                print(f"İşlem hatası: {e}")
+                                print("İşlem hatası: {}".format(e))
                         futures -= completed
                         
             except KeyboardInterrupt:
@@ -321,19 +321,19 @@ class EthereumWalletGenerator:
         total_seconds = int(elapsed_time.total_seconds())
         
         print("\n" + "=" * 50)
-        print(f"📊 TARAMA SONUÇLARI")
+        print("📊 TARAMA SONUÇLARI")
         print("=" * 50)
-        print(f"⏱️  Toplam süre: {str(timedelta(seconds=total_seconds))}")
-        print(f"📈 Üretilen cüzdan: {self.total_generated} adet")
-        print(f"⚡ Ortalama hız: {speed:.2f} cüzdan/saniye")
-        print(f"💰 Bakiyeli bulunan: {len(self.found_wallets)} cüzdan")
-        print(f"📝 Log dosyası: {self.log_file}")
+        print("⏱️  Toplam süre: {}".format(str(timedelta(seconds=total_seconds))))
+        print("📈 Üretilen cüzdan: {} adet".format(self.total_generated))
+        print("⚡ Ortalama hız: {:.2f} cüzdan/saniye".format(speed))
+        print("💰 Bakiyeli bulunan: {} cüzdan".format(len(self.found_wallets)))
+        print("📝 Log dosyası: {}".format(self.log_file))
         if self.found_wallets:
             print("\n💎 BULUNAN BAKİYELİ CÜZDANLAR:")
             for wallet in self.found_wallets:
-                print(f"   Adres: {wallet['address']}")
-                print(f"   Bakiye: {wallet['balance']} ETH")
-                print(f"   Seed: {wallet['seed_phrase']}")
+                print("   Adres: {}".format(wallet['address']))
+                print("   Bakiye: {} ETH".format(wallet['balance']))
+                print("   Seed: {}".format(wallet['seed_phrase']))
                 print("   " + "-" * 40)
         print("=" * 50)
 
