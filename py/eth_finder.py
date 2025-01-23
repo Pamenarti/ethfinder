@@ -35,7 +35,7 @@ class EthereumWalletGenerator:
         self.wallet_limit = wallet_limit
         self.start_time = None
         self.last_stat_time = None
-        self.display_format = "%4s | %42s | %20s | %90s"
+        self.display_format = "%-4d | %-42s | %-20s | %-90s"
         self.mnemo = Mnemonic("english")
         self.save_wallets = save_wallets
         self.delay = delay
@@ -47,13 +47,13 @@ class EthereumWalletGenerator:
         with open(self.log_file, 'w', encoding='utf-8') as f:
             f.write("Timestamp,Address,Seed Phrase,Balance\n")
         
-        print("\n" + self.display_format % ("SIRA", "ADRES", "BAKIYE", "SEED PHRASE"))
+        print("\n" + "%-4s | %-42s | %-20s | %-90s" % ("SIRA", "ADRES", "BAKIYE", "SEED PHRASE"))
         print("-" * 160)
         
         self.wallet_queue = Queue(maxsize=1000)
         self.log_lock = Lock()
         self.save_lock = Lock()
-        self.batch_size = 100
+        self.batch_size = 1
         self.wallet_buffer = []
         self.running = True
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -78,6 +78,7 @@ class EthereumWalletGenerator:
     
     def check_balance(self, address):
         try:
+            time.sleep(0.5)
             balance = w3.eth.get_balance(address)
             return w3.from_wei(balance, 'ether')
         except Exception as e:
@@ -108,7 +109,7 @@ class EthereumWalletGenerator:
             with open(self.log_file, 'a', encoding='utf-8') as f:
                 f.writelines(entries)
 
-    def process_wallet_batch(self, size=100):
+    def process_wallet_batch(self, size=1):
         wallets = []
         log_entries = []
         
@@ -128,9 +129,10 @@ class EthereumWalletGenerator:
             
             if self.wallet_limit:
                 progress = (self.total_generated / self.wallet_limit) * 100
-                print("\rIlerleme: %.1f%% (%d/%d)" % (progress, self.total_generated, self.wallet_limit), end="")
+                sys.stdout.write("\rIlerleme: %.1f%% (%d/%d)                    " % (progress, self.total_generated, self.wallet_limit))
+                sys.stdout.flush()
             
-            print(self.display_format % (
+            print("\n%-4d | %-42s | %-20s | %-90s" % (
                 self.total_generated,
                 wallet['address'],
                 "%.8f ETH" % wallet['balance'],
@@ -204,34 +206,24 @@ class EthereumWalletGenerator:
                     if self.wallet_limit:
                         remaining -= batch_size
                     
-                    completed = set()
-                    for f in futures:
-                        if f.done():
-                            try:
-                                f.result()
-                                completed.add(f)
-                            except Exception as e:
-                                print("Islem hatasi: %s" % e)
-                    
+                    completed = {f for f in futures if f.done()}
+                    for f in completed:
+                        try:
+                            f.result()
+                        except Exception as e:
+                            print("Islem hatasi: %s" % e)
                     futures -= completed
                     
-                    if self.total_generated > 0 and self.total_generated % self.batch_size == 0:
-                        self.print_stats()
-                    
-                    while len(futures) >= optimal_threads and self.running:
-                        time.sleep(0.1)
-                        
-                        completed = {f for f in futures if f.done()}
-                        for f in completed:
-                            try:
-                                f.result()
-                            except Exception as e:
-                                print("Islem hatasi: %s" % e)
-                        futures -= completed
-                        
+                    time.sleep(0.1)
+                
+                wait(futures)
+                
+                self.print_stats()
+                
             except KeyboardInterrupt:
                 print("\n\nDurdurma sinyali alindi...")
                 self.running = False
+                self.print_stats()
                 
             finally:
                 print("\nIslemler durduruluyor...")
