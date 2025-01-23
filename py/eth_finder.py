@@ -24,7 +24,7 @@ else:
 
 Account.enable_unaudited_hdwallet_features()
 
-w3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/14c9f44d16cf45af87a73cbdc4312ae8'))
+w3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/apiid'))
 
 class EthereumWalletGenerator:
     def __init__(self, output_file="wallets.json", test_mode=False, wallet_limit=None, save_wallets=False, delay=0):
