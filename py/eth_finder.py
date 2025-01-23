@@ -44,12 +44,12 @@ class EthereumWalletGenerator:
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.log_file = "wallet_scan_{}.log".format(timestamp)
-        print("Log dosyası: {}".format(self.log_file))
+        print("Log dosyasi: {}".format(self.log_file))
         
         with open(self.log_file, 'w', encoding='utf-8') as f:
             f.write("Timestamp,Address,Seed Phrase,Balance\n")
         
-        print("\n" + self.display_format.format("SIRA", "ADRES", "BAKİYE", "SEED PHRASE"))
+        print("\n" + self.display_format.format("SIRA", "ADRES", "BAKIYE", "SEED PHRASE"))
         print("-" * 160)
         
         self.wallet_queue = Queue(maxsize=1000)
@@ -62,7 +62,7 @@ class EthereumWalletGenerator:
         self.stop_thread = None
         
     def signal_handler(self, signum, frame):
-        print("\n\n⚠️ Durdurma sinyali alındı. Program güvenli bir şekilde sonlandırılıyor...")
+        print("\n\nDurdurma sinyali alindi. Program guvenli bir sekilde sonlandiriliyor...")
         self.running = False
         
     def generate_wallet(self):
@@ -104,7 +104,7 @@ class EthereumWalletGenerator:
                 with open(self.output_file, 'w') as f:
                     json.dump(existing_wallets, f, indent=4)
             except Exception as e:
-                print("Toplu kayıt hatası: {}".format(e))
+                print("Toplu kayit hatasi: {}".format(e))
 
     def log_wallet_batch(self, entries):
         with self.log_lock:
@@ -146,7 +146,7 @@ class EthereumWalletGenerator:
             if wallet['balance'] > 0:
                 wallet['found_at'] = datetime.now().isoformat()
                 self.found_wallets.append(wallet)
-                print("\n💰 BAKİYELİ CÜZDAN BULUNDU! Adres: {}, Bakiye: {} ETH\n".format(wallet['address'], wallet['balance']))
+                print("\nBAKIYELI CUZDAN BULUNDU! Adres: {}, Bakiye: {} ETH\n".format(wallet['address'], wallet['balance']))
             
             wallets.append(wallet)
         
@@ -171,28 +171,28 @@ class EthereumWalletGenerator:
         total_seconds = int(elapsed_time.total_seconds())
         
         print("\n" + "=" * 50)
-        print("📊 PERFORMANS İSTATİSTİKLERİ")
+        print("PERFORMANS ISTATISTIKLERI")
         print("=" * 50)
-        print("⏱️  Geçen süre: {}".format(str(timedelta(seconds=total_seconds))))
-        print("📈 Toplam üretilen: {} cüzdan".format(self.total_generated))
-        print("⚡ Hız: {:.2f} cüzdan/saniye".format(speed))
+        print("Gecen sure: {}".format(str(timedelta(seconds=total_seconds))))
+        print("Toplam uretilen: {} cuzdan".format(self.total_generated))
+        print("Hiz: {:.2f} cuzdan/saniye".format(speed))
         
         if self.total_generated > 0:
-            print("💡 Ortalama: {:.2f} saniye/cüzdan".format(total_seconds/self.total_generated))
+            print("Ortalama: {:.2f} saniye/cuzdan".format(total_seconds/self.total_generated))
         
-        print("💰 Bakiyeli bulunan: {} cüzdan".format(len(self.found_wallets)))
-        print("📝 Log dosyası: {}".format(self.log_file))
+        print("Bakiyeli bulunan: {} cuzdan".format(len(self.found_wallets)))
+        print("Log dosyasi: {}".format(self.log_file))
         print("=" * 50 + "\n")
 
     def check_stop_key(self):
-        print("\nProgramı durdurmak için 'S' tuşuna basın...")
+        print("\nProgrami durdurmak icin 'S' tusuna basin...")
         
         if os.name == 'nt':
             while self.running:
                 if msvcrt.kbhit():
                     key = msvcrt.getch().decode('utf-8').lower()
                     if key == 's':
-                        print("\n⚠️ S tuşuna basıldı. Program kapatılıyor...")
+                        print("\nS tusuna basildi. Program kapatiliyor...")
                         self.running = False
                         break
                 time.sleep(0.1)
@@ -202,16 +202,16 @@ class EthereumWalletGenerator:
                 tty.setcbreak(sys.stdin.fileno())
                 while self.running:
                     if sys.stdin.read(1).lower() == 's':
-                        print("\n⚠️ S tuşuna basıldı. Program kapatılıyor...")
+                        print("\nS tusuna basildi. Program kapatiliyor...")
                         self.running = False
                         break
             finally:
                 termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
     def run(self, num_threads=4):
-        print("{}Ethereum cüzdan taraması başlatılıyor...".format('TEST MODUNDA ' if self.test_mode else ''))
+        print("{}Ethereum cuzdan taramasi baslatiliyor...".format('TEST MODUNDA ' if self.test_mode else ''))
         if self.wallet_limit:
-            print("Hedef cüzdan sayısı: {}".format(self.wallet_limit))
+            print("Hedef cuzdan sayisi: {}".format(self.wallet_limit))
         
         self.start_time = datetime.now()
         self.last_stat_time = self.start_time
@@ -261,7 +261,7 @@ class EthereumWalletGenerator:
                         futures -= completed
                         
             except KeyboardInterrupt:
-                print("\n\n⚠️ Durdurma sinyali alındı...")
+                print("\n\nDurdurma sinyali alindi...")
                 self.running = False
                 
             finally:
@@ -280,7 +280,7 @@ class EthereumWalletGenerator:
                 if stop_thread.is_alive():
                     stop_thread.join(timeout=1)
                 
-                print("\n🛑 Program durduruldu.")
+                print("\nProgram durduruldu.")
                 self.print_final_stats()
 
     def print_final_stats(self):
@@ -289,15 +289,15 @@ class EthereumWalletGenerator:
         total_seconds = int(elapsed_time.total_seconds())
         
         print("\n" + "=" * 50)
-        print("📊 TARAMA SONUÇLARI")
+        print("TARAMA SONUCLARI")
         print("=" * 50)
-        print("⏱️  Toplam süre: {}".format(str(timedelta(seconds=total_seconds))))
-        print("📈 Üretilen cüzdan: {} adet".format(self.total_generated))
-        print("⚡ Ortalama hız: {:.2f} cüzdan/saniye".format(speed))
-        print("💰 Bakiyeli bulunan: {} cüzdan".format(len(self.found_wallets)))
-        print("📝 Log dosyası: {}".format(self.log_file))
+        print("Toplam sure: {}".format(str(timedelta(seconds=total_seconds))))
+        print("Uretilen cuzdan: {} adet".format(self.total_generated))
+        print("Ortalama hiz: {:.2f} cuzdan/saniye".format(speed))
+        print("Bakiyeli bulunan: {} cuzdan".format(len(self.found_wallets)))
+        print("Log dosyasi: {}".format(self.log_file))
         if self.found_wallets:
-            print("\n💎 BULUNAN BAKİYELİ CÜZDANLAR:")
+            print("\nBULUNAN BAKIYELI CUZDANLAR:")
             for wallet in self.found_wallets:
                 print("   Adres: {}".format(wallet['address']))
                 print("   Bakiye: {} ETH".format(wallet['balance']))
@@ -306,21 +306,22 @@ class EthereumWalletGenerator:
         print("=" * 50)
 
 def main():
-    parser = argparse.ArgumentParser(description='Ethereum Cüzdan Bulucu')
-    parser.add_argument('--test', action='store_true', help='Test modunda çalıştır')
-    parser.add_argument('--output', type=str, default='wallets.json', help='Çıktı dosyası')
-    parser.add_argument('--threads', type=int, default=4, help='İş parçacığı sayısı')
-    parser.add_argument('--limit', type=int, help='Üretilecek cüzdan sayısı')
-    parser.add_argument('--save', action='store_true', help='Taranan cüzdanları kaydet')
-    parser.add_argument('--delay', type=float, default=0, help='Her cüzdan üretimi arasındaki bekleme süresi (saniye)')
+    parser = argparse.ArgumentParser(description='Ethereum Cuzdan Bulucu')
+    parser.add_argument('--test', action='store_true', help='Test modunda calistir')
+    parser.add_argument('--output', type=str, default='wallets.json', help='Cikti dosyasi')
+    parser.add_argument('--threads', type=int, default=4, help='Is parcacigi sayisi')
+    parser.add_argument('--limit', type=int, help='Uretilecek cuzdan sayisi')
+    parser.add_argument('--save', action='store_true', help='Taranan cuzdanlari kaydet')
+    parser.add_argument('--delay', type=float, default=0, 
+                       help='Her cuzdan uretimi arasindaki bekleme suresi (saniye)')
     
     args = parser.parse_args()
     
     if not args.limit:
         try:
-            args.limit = int(input("Kaç adet cüzdan üretmek istiyorsunuz? (Limitsiz için 0): "))
+            args.limit = int(input("Kac adet cuzdan uretmek istiyorsunuz? (Limitsiz icin 0): "))
         except ValueError:
-            print("Geçersiz sayı, limitsiz devam ediliyor...")
+            print("Gecersiz sayi, limitsiz devam ediliyor...")
             args.limit = None
             
     if args.limit == 0:
